@@ -22,22 +22,25 @@ bp = Blueprint('main', __name__)
 def index():
     error = None
     if request.method == 'POST':
-        name = request.form['name']
-        email = request.form['email']
+        name = request.form.get('name')
+        email = request.form.get('email')
+        bio = request.form.get('bio')   
+
         if name and email:
             existing_user = User.query.filter_by(email=email).first()
             if existing_user:
                 error = "A user with this email already exists."
                 print(error)
             else:
-                user = User(name=name, email=email)
+                user = User(name=name, email=email, bio=bio)  
                 db.session.add(user)
                 db.session.commit()
                 return redirect(url_for('main.index'))
-    # Query all users and posts to display on the homepage
+
     users = User.query.all()
-    posts = Post.query.order_by(Post.id.desc()).all()  # Get all posts, newest first
+    posts = Post.query.order_by(Post.created_at.desc()).all()
     return render_template('index.html', users=users, posts=posts, error=error)
+
 
 # Route to add a new post
 # Handles POST requests to '/add_post':
